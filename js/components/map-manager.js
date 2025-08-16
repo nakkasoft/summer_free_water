@@ -38,10 +38,12 @@ class MapManager {
     }
 
     setupMarkerImage() {
-        const imageSrc = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png';
-        const imageSize = new kakao.maps.Size(64, 69);
-        const imageOption = {offset: new kakao.maps.Point(27, 69)};
+        // 예쁜 생수 마커 이미지 사용
+        const imageSrc = 'images/water-marker.svg';
+        const imageSize = new kakao.maps.Size(40, 50);
+        const imageOption = {offset: new kakao.maps.Point(20, 50)};
         this.markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize, imageOption);
+        console.log('예쁜 생수 마커 이미지 설정 완료');
     }
 
     async loadAndDisplayStations() {

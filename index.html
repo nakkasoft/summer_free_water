@@ -2,184 +2,272 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>카카오 지도 샘플</title>
-    <style>
-        .customoverlay {position:relative;bottom:85px;border-radius:6px;border: 1px solid #ccc;border-bottom:2px solid #ddd;float:left;}
-        .customoverlay:nth-of-type(n) {border:0; box-shadow:0px 1px 2px #888;}
-        .customoverlay a {display:block;text-decoration:none;color:#000;text-align:center;border-radius:6px;font-size:14px;font-weight:bold;overflow:hidden;background: #d95050;background: #d95050 url(https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/arrow_white.png) no-repeat right 14px center;}
-        .customoverlay .title {display:block;text-align:center;background:#fff;margin-right:35px;padding:10px 15px;font-size:14px;font-weight:bold;}
-        .customoverlay:after {content:'';position:absolute;margin-left:-12px;left:50%;bottom:-12px;width:22px;height:12px;background:url('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/vertex_white.png')}
-
-        .wrap {position: absolute;left: 0;bottom: 40px;width: 288px;height: 132px;margin-left: -144px;text-align: left;overflow: hidden;font-size: 12px;font-family: 'Malgun Gothic', dotum, '돋움', sans-serif;line-height: 1.5;}
-        .wrap * {padding: 0;margin: 0;}
-        .wrap .info {width: 286px;height: 120px;border-radius: 5px;border-bottom: 2px solid #ccc;border-right: 1px solid #ccc;overflow: hidden;background: #fff;}
-        .wrap .info:nth-child(1) {border: 0;box-shadow: 0px 1px 2px #888;}
-        .info .title {padding: 5px 0 0 10px;height: 30px;background: #eee;border-bottom: 1px solid #ddd;font-size: 18px;font-weight: bold;}
-        .info .close {position: absolute;top: 10px;right: 10px;color: #888;width: 17px;height: 17px;background: url('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/overlay_close.png');}
-        .info .close:hover {cursor: pointer;}
-        .info .body {position: relative;overflow: hidden;}
-        .info .desc {position: relative;margin: 13px 0 0 90px;height: 75px;}
-        .desc .ellipsis {overflow: hidden;text-overflow: ellipsis;white-space: nowrap;}
-        .desc .jibun {font-size: 11px;color: #888;margin-top: -2px;}
-        .info .img {position: absolute;top: 6px;left: 5px;width: 73px;height: 71px;border: 1px solid #ddd;color: #888;overflow: hidden;}
-        .info:after {content: '';position: absolute;margin-left: -12px;left: 50%;bottom: 0;width: 22px;height: 12px;background: url('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/vertex_white.png')}
-        .info .link {color: #5085BB;}
-    </style>
+    <title>서울시 여름철 무료 생수 제공 위치</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="서울시 각 구에서 운영하는 여름철 무료 생수 제공 위치를 지도에서 확인하세요.">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <div id="map" style="width:1500px;height:1400px;"></div>
-    <script src="config.js"></script>
+    <!-- 로딩 화면 -->
+    <div id="loading">
+        <div>데이터를 로드하는 중...</div>
+        <div id="loadingStatus" style="font-size: 12px; margin-top: 10px; color: #666;"></div>
+    </div>
+
+    <!-- 디버그 정보 (개발용) -->
+    <div id="debug-info" style="position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; font-size: 12px; max-width: 300px; display: none;">
+        <div id="debug-content"></div>
+        <button onclick="document.getElementById('debug-info').style.display='none'" style="margin-top: 5px; padding: 2px 5px;">닫기</button>
+    </div>
+
+    <!-- 지도 컨테이너 -->
+    <div id="map"></div>
+    
+    <!-- 컨트롤 패널 -->
+    <div id="controls">
+        <h3>🚰 생수 제공 위치 찾기</h3>
+        
+        <div class="control-group">
+            <label for="districtFilter">구별 검색</label>
+            <select id="districtFilter">
+                <option value="">전체 구</option>
+                <option value="중구">중구</option>
+                <option value="중랑구">중랑구</option>
+                <option value="성북구">성북구</option>
+                <option value="도봉구">도봉구</option>
+                <option value="노원구">노원구</option>
+                <option value="마포구">마포구</option>
+                <option value="강북구">강북구</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <label for="typeFilter">제공 방식</label>
+            <select id="typeFilter">
+                <option value="">전체 타입</option>
+                <option value="생수제공">생수제공</option>
+                <option value="냉장고">냉장고</option>
+                <option value="냉장고(전화인증)">냉장고(전화인증)</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <label for="searchInput">장소명/주소 검색</label>
+            <div class="control-row">
+                <input type="text" id="searchInput" placeholder="예: 시청, 공원, 도서관">
+                <button id="searchBtn">검색</button>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <div class="control-row">
+                <button id="nearbyBtn">📍 내 주변</button>
+                <button id="showAllBtn">🗺️ 전체 보기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 통계 정보 -->
+    <div id="stats" style="display: none;">
+        <span id="totalCount">전체: 0개</span>
+        <span id="operatingCount">운영중: 0개</span>
+    </div>
+
+    <!-- JavaScript 파일들 -->
+    <script src="js/utils/config-loader.js"></script>
+    <script src="js/database/database-interface.js"></script>
+    <script src="js/database/local-database.js"></script>
+    <script src="js/database/supabase-database.js"></script>
+    <script src="js/database/firebase-database.js"></script>
+    <script src="js/database/database-factory.js"></script>
+    <script src="js/services/water-station-service.js"></script>
+    <script src="js/components/map-manager.js"></script>
+    <script src="js/components/ui-controller.js"></script>
     <script>
-        // 환경 변수를 로드하고 카카오 맵을 초기화하는 함수
-        async function initializeMap() {
-            const config = await loadConfig();
-            const apiKey = config.KAKAO_API_KEY || 'YOUR_API_KEY_HERE';
-
-            if (!apiKey) {
-                console.error('API 키가 설정되지 않았습니다.');
-                return;
-            }else{
-                console.log('API 키가 설정되었습니다.');
-                console.log(apiKey);
-            }
-            
-            // 카카오 맵 SDK를 동적으로 로드 (autoload=false 옵션 추가)
-            const script = document.createElement('script');
-            script.type = 'text/javascript';
-            script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${apiKey}&autoload=false`;
-            script.onload = function() {
-                // SDK 로드 완료 후 수동으로 맵 초기화
-                kakao.maps.load(function() {
-                    setupMap();
-                });
-            };
-            script.onerror = function() {
-                console.error('카카오 맵 SDK 로드에 실패했습니다.');
-            };
-            document.head.appendChild(script);
-        }
-
-        function setupMap() {
-            var container = document.getElementById('map');
-            if (!container) {
-                console.error('지도 컨테이너를 찾을 수 없습니다.');
-                return;
-            }
-            var options = {
-                center: new kakao.maps.LatLng(37.566826, 126.9786567), // 서울 시청 좌표
-                level: 3
-            };
-
-            var map = new kakao.maps.Map(container, options);
-
-            var imageSrc = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png', // 마커이미지의 주소입니다    
-                imageSize = new kakao.maps.Size(64, 69), // 마커이미지의 크기입니다
-                imageOption = {offset: new kakao.maps.Point(27, 69)}; // 마커이미지의 옵션입니다. 마커의 좌표와 일치시킬 이미지 안에서의 좌표를 설정합니다.
-            // 마커의 이미지정보를 가지고 있는 마커이미지를 생성합니다
-            var markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize, imageOption);
-
-            // 현재 열려있는 오버레이를 추적하는 변수
-            var currentOverlay = null;
-
-            // 커스텀 오버레이 닫기 함수를 전역으로 정의
-            window.closeOverlay = function() {
-                if (currentOverlay) {
-                    currentOverlay.setMap(null);
-                    currentOverlay = null;
-                }
-            };
-
-            // 생수 제공 장소 데이터
-            var waterStations = [
-                {
-                    position: new kakao.maps.LatLng(37.566826, 126.9786567),
-                    title: "서울시청 급수대",
-                    address: "서울특별시 중구 세종대로 110",
-                    operatingHours: "24시간 운영",
-                    operator: "중구청",
-                    phone: "02-3396-5000",
-                    type: "정수기",
-                    status: "운영중"
-                },
-                {
-                    position: new kakao.maps.LatLng(37.555946, 126.972317),
-                    title: "남산공원 급수대",
-                    address: "서울특별시 중구 회현동1가 100-177",
-                    operatingHours: "06:00-22:00",
-                    operator: "중구청",
-                    phone: "02-3396-5000",
-                    type: "생수제공",
-                    status: "운영중"
-                }
-            ];
-
-            // 생수 제공소 정보창 생성 함수
-            function createWaterStationContent(station) {
-                var statusClass = station.status === "운영중" ? "operating" : "closed";
-                var statusIcon = station.status === "운영중" ? "✅" : "❌";
-                
-                return '<div class="wrap">' + 
-                '    <div class="info">' + 
-                '        <div class="title">' + 
-                '            🚰 ' + station.title + 
-                '            <div class="close" onclick="closeOverlay()" title="닫기"></div>' + 
-                '        </div>' + 
-                '        <div class="body">' + 
-                '            <div class="img">' +
-                '                <div style="width:73px;height:70px;background:#f0f8ff;display:flex;align-items:center;justify-content:center;font-size:24px;">💧</div>' +
-                '           </div>' + 
-                '            <div class="desc">' + 
-                '                <div class="ellipsis"><strong>' + station.address + '</strong></div>' + 
-                '                <div class="jibun ellipsis">⏰ ' + station.operatingHours + '</div>' + 
-                '                <div class="jibun ellipsis">🏢 ' + station.operator + '</div>' + 
-                '                <div class="jibun ellipsis">📞 ' + station.phone + '</div>' + 
-                '                <div class="ellipsis">' + statusIcon + ' ' + station.status + ' (' + station.type + ')</div>' + 
-                '            </div>' + 
-                '        </div>' + 
-                '    </div>' +    
-                '</div>';
+        class App {
+            constructor() {
+                this.configLoader = new ConfigLoader();
+                this.waterStationService = null;
+                this.mapManager = null;
+                this.uiController = null;
             }
 
-            // 마커를 생성하고 지도위에 표시하는 함수
-            function addWaterStationMarker(station) {
-                // 마커를 생성합니다
-                var marker = new kakao.maps.Marker({
-                    position: station.position,
-                    image: markerImage // 마커이미지 설정 
-                });
+            async initialize() {
+                try {
+                    this.showLoading(true, '앱 초기화 중...');
+                    console.log('앱 초기화 시작...');
 
-                // 마커가 지도 위에 표시되도록 설정합니다
-                marker.setMap(map);
+                    // 설정 로드
+                    this.showLoading(true, '설정 로드 중...');
+                    console.log('설정 로드 중...');
+                    const config = await this.configLoader.loadConfig();
+                    console.log('설정 로드 완료:', { hasApiKey: !!config.KAKAO_API_KEY, dbType: config.DATABASE_TYPE });
 
-                // 커스텀 오버레이를 생성합니다 (초기에는 지도에 표시하지 않음)
-                var customOverlay = new kakao.maps.CustomOverlay({
-                    position: marker.getPosition(),
-                    content: createWaterStationContent(station),
-                    yAnchor: 1
-                });
+                    // API 키 검증
+                    if (!config.KAKAO_API_KEY) {
+                        throw new Error('카카오맵 API 키가 설정되지 않았습니다. js/utils/config-loader.js 파일을 확인해주세요.');
+                    }
 
-                // 마커를 클릭했을 때 커스텀 오버레이를 표시합니다
-                kakao.maps.event.addListener(marker, 'click', function() {
-                    // 이전에 열려있던 오버레이가 있다면 닫습니다
-                    if (currentOverlay) {
-                        currentOverlay.setMap(null);
+                    // 데이터베이스 초기화
+                    this.showLoading(true, '데이터베이스 연결 중...');
+                    console.log('데이터베이스 초기화 중...');
+                    const dbType = this.configLoader.getDatabaseType();
+                    const dbConfig = this.configLoader.getDatabaseConfig();
+                    const database = DatabaseFactory.create(dbType, dbConfig);
+                    
+                    this.waterStationService = new WaterStationService(database);
+                    const dbInitResult = await this.waterStationService.initialize();
+                    
+                    if (!dbInitResult) {
+                        throw new Error('데이터베이스 초기화에 실패했습니다.');
+                    }
+                    console.log('데이터베이스 초기화 완료');
+
+                    // 카카오 맵 SDK 로드
+                    this.showLoading(true, '카카오맵 SDK 로드 중...');
+                    console.log('카카오맵 SDK 로드 중...');
+                    await this.loadKakaoMaps(config.KAKAO_API_KEY);
+                    console.log('카카오맵 SDK 로드 완료');
+
+                    // 컴포넌트 초기화
+                    this.showLoading(true, '지도 및 UI 초기화 중...');
+                    console.log('컴포넌트 초기화 중...');
+                    this.mapManager = new MapManager('map', this.waterStationService);
+                    this.uiController = new UIController(this.waterStationService, this.mapManager);
+
+                    await this.mapManager.initialize();
+                    this.uiController.initialize();
+                    console.log('컴포넌트 초기화 완료');
+
+                    // 통계 정보 업데이트
+                    this.showLoading(true, '통계 정보 업데이트 중...');
+                    await this.updateStats();
+
+                    this.showLoading(false);
+                    console.log('앱 초기화 완료');
+
+                } catch (error) {
+                    console.error('앱 초기화 실패:', error);
+                    this.showLoading(false);
+                    
+                    // 사용자에게 더 구체적인 에러 메시지 제공
+                    let userMessage = '앱을 초기화하는데 실패했습니다.';
+                    let debugInfo = `에러 상세 정보:\n${error.message}\n\n`;
+                    
+                    if (error.message.includes('API 키')) {
+                        userMessage = '카카오맵 API 키 문제입니다.';
+                        debugInfo += '해결 방법:\n1. https://developers.kakao.com 에서 API 키 발급\n2. js/utils/config-loader.js 파일에서 API 키 설정';
+                    } else if (error.message.includes('네트워크') || error.message.includes('로드')) {
+                        userMessage = '네트워크 연결 문제입니다.';
+                        debugInfo += '해결 방법:\n1. 인터넷 연결 확인\n2. 방화벽 설정 확인\n3. 로컬 웹서버 사용 (CORS 문제)';
+                    } else if (error.message.includes('데이터베이스')) {
+                        userMessage = '데이터 로드 문제입니다.';
+                        debugInfo += '해결 방법:\n1. data/water_stations.json 파일 확인\n2. 로컬 웹서버 사용 필요';
                     }
                     
-                    // 새로운 오버레이를 표시합니다
-                    customOverlay.setMap(map);
-                    currentOverlay = customOverlay;
+                    alert(userMessage + '\n\n자세한 정보는 디버그 창을 확인하세요.');
+                    this.showDebugInfo(debugInfo);
+                }
+            }
+
+            async loadKakaoMaps(apiKey) {
+                return new Promise((resolve, reject) => {
+                    // API 키 유효성 검증
+                    if (!apiKey || apiKey === 'YOUR_ACTUAL_API_KEY_HERE' || apiKey.length < 10) {
+                        reject(new Error('유효하지 않은 카카오맵 API 키입니다. config-loader.js에서 API 키를 확인해주세요.'));
+                        return;
+                    }
+
+                    // 이미 로드된 경우 처리
+                    if (window.kakao && window.kakao.maps) {
+                        console.log('카카오맵 SDK가 이미 로드되어 있습니다.');
+                        resolve();
+                        return;
+                    }
+
+                    console.log('카카오맵 SDK 로드 시작...');
+                    
+                    const script = document.createElement('script');
+                    script.type = 'text/javascript';
+                    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${apiKey}&autoload=false`;
+                    
+                    // 타임아웃 설정 (10초)
+                    const timeout = setTimeout(() => {
+                        reject(new Error('카카오맵 SDK 로드 시간이 초과되었습니다. 네트워크 연결을 확인해주세요.'));
+                    }, 10000);
+
+                    script.onload = function() {
+                        clearTimeout(timeout);
+                        console.log('카카오맵 SDK 스크립트 로드 완료');
+                        
+                        // kakao.maps.load로 실제 지도 API 초기화
+                        if (window.kakao && window.kakao.maps) {
+                            kakao.maps.load(function() {
+                                console.log('카카오맵 API 초기화 완료');
+                                resolve();
+                            });
+                        } else {
+                            reject(new Error('카카오맵 객체를 찾을 수 없습니다.'));
+                        }
+                    };
+
+                    script.onerror = function(error) {
+                        clearTimeout(timeout);
+                        console.error('카카오맵 SDK 스크립트 로드 실패:', error);
+                        reject(new Error('카카오맵 SDK 스크립트를 로드할 수 없습니다. API 키나 네트워크 연결을 확인해주세요.'));
+                    };
+
+                    // DOM에 스크립트 추가
+                    document.head.appendChild(script);
                 });
             }
 
-            // 모든 생수 제공소에 마커를 추가합니다
-            waterStations.forEach(function(station) {
-                addWaterStationMarker(station);
-            });
+            showLoading(show, status = '') {
+                const loadingEl = document.getElementById('loading');
+                const statusEl = document.getElementById('loadingStatus');
+                
+                if (loadingEl) {
+                    loadingEl.style.display = show ? 'block' : 'none';
+                }
+                
+                if (statusEl && status) {
+                    statusEl.textContent = status;
+                }
+            }
 
+            showDebugInfo(message) {
+                const debugEl = document.getElementById('debug-info');
+                const contentEl = document.getElementById('debug-content');
+                
+                if (debugEl && contentEl) {
+                    contentEl.innerHTML = message.replace(/\n/g, '<br>');
+                    debugEl.style.display = 'block';
+                }
+            }
+
+            async updateStats() {
+                try {
+                    const allStations = await this.waterStationService.getAllStations();
+                    const operatingCount = allStations.filter(s => s.status === '운영중').length;
+                    
+                    const totalCountEl = document.getElementById('totalCount');
+                    const operatingCountEl = document.getElementById('operatingCount');
+                    const statsEl = document.getElementById('stats');
+                    
+                    if (totalCountEl) totalCountEl.textContent = `전체: ${allStations.length}개`;
+                    if (operatingCountEl) operatingCountEl.textContent = `운영중: ${operatingCount}개`;
+                    if (statsEl) statsEl.style.display = 'block';
+                } catch (error) {
+                    console.error('통계 정보 업데이트 실패:', error);
+                }
+            }
         }
 
-        // 페이지 로드 시 맵 초기화
-        initializeMap();
+        // 앱 시작
+        document.addEventListener('DOMContentLoaded', () => {
+            const app = new App();
+            app.initialize();
+        });
     </script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 class MapManager {
-    constructor(containerId, waterStationService) {
+    constructor(containerId, waterStationService, userLocation = null) {
         this.containerId = containerId;
         this.waterStationService = waterStationService;
         this.map = null;
@@ -7,6 +7,7 @@ class MapManager {
         this.currentOverlay = null;
         this.markerImage = null;
         this.userLocationMarker = null; // 사용자 위치 마커
+        this.initialUserLocation = userLocation; // 초기 사용자 위치
     }
 
     async initialize() {
@@ -14,6 +15,12 @@ class MapManager {
             await this.createMap();
             this.setupMarkerImage();
             await this.loadAndDisplayStations();
+            
+            // 초기 사용자 위치가 있으면 마커 표시
+            if (this.initialUserLocation) {
+                this.showUserLocation(this.initialUserLocation.lat, this.initialUserLocation.lng);
+            }
+            
             console.log('맵 매니저 초기화 완료');
         } catch (error) {
             console.error('맵 매니저 초기화 실패:', error);
@@ -27,9 +34,23 @@ class MapManager {
             throw new Error('지도 컨테이너를 찾을 수 없습니다.');
         }
 
+        // 사용자 위치가 있으면 그것을 중심으로, 없으면 서울 시청을 중심으로
+        let centerLat = 37.566826; // 서울 시청 기본값
+        let centerLng = 126.9786567;
+        let initialLevel = 8;
+
+        if (this.initialUserLocation) {
+            centerLat = this.initialUserLocation.lat;
+            centerLng = this.initialUserLocation.lng;
+            initialLevel = 6; // 사용자 위치일 때는 더 확대해서 보여줌
+            console.log('지도 중심을 사용자 위치로 설정:', centerLat, centerLng);
+        } else {
+            console.log('지도 중심을 서울 시청으로 설정 (기본값)');
+        }
+
         const options = {
-            center: new kakao.maps.LatLng(37.566826, 126.9786567), // 서울 시청
-            level: 8
+            center: new kakao.maps.LatLng(centerLat, centerLng),
+            level: initialLevel
         };
 
         this.map = new kakao.maps.Map(container, options);
@@ -121,7 +142,6 @@ class MapManager {
                             <div style="width:73px;height:70px;background:#f0f8ff;display:flex;align-items:center;justify-content:center;font-size:24px;">💧</div>
                         </div>
                         <div class="desc">
-                            <div class="ellipsis"><strong>${station.address}</strong></div>
                             <div class="jibun ellipsis">⏰ ${station.operatingHours}</div>
                             <div class="jibun ellipsis">🏢 ${station.operator}</div>
                             <div class="jibun ellipsis">📞 ${phoneInfo}</div>

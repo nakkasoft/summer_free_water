@@ -105,7 +105,8 @@ class MapManager {
         
         const marker = new kakao.maps.Marker({
             position: position,
-            image: this.markerImage
+            image: this.markerImage,
+            zIndex: 5 // 사용자 위치보다는 위, 정보창보다는 아래
         });
 
         marker.setMap(this.map);
@@ -115,7 +116,8 @@ class MapManager {
         const customOverlay = new kakao.maps.CustomOverlay({
             position: position,
             content: this.createStationInfoContent(station),
-            yAnchor: 1
+            yAnchor: 1,
+            zIndex: 1000 // 정보창을 가장 위에 표시
         });
 
         // 마커 클릭 이벤트
@@ -128,7 +130,25 @@ class MapManager {
 
     createStationInfoContent(station) {
         const statusIcon = station.status === "운영중" ? "✅" : "❌";
-        const phoneInfo = station.phone || "정보없음";
+        
+        // 구청별 전화번호 매핑
+        const districtPhones = {
+            '중구': '02-3396-4000',
+            '중랑구': '02-2094-1000',
+            '성북구': '02-2241-1000',
+            '도봉구': '02-2091-2000',
+            '노원구': '02-2116-3000',
+            '마포구': '02-3153-8000',
+            '강북구': '02-901-6000'
+        };
+        
+        const phone = districtPhones[station.district] || '';
+        const isMobile = window.innerWidth <= 768;
+        
+        // 모바일에서는 구청 이름을 클릭 가능한 전화링크로 만들기
+        const operatorDisplay = isMobile && phone 
+            ? `<a href="tel:${phone}" style="color: #0066cc; text-decoration: none;">${station.operator}</a>`
+            : station.operator;
         
         return `
             <div class="wrap">
@@ -143,8 +163,7 @@ class MapManager {
                         </div>
                         <div class="desc">
                             <div class="jibun ellipsis">⏰ ${station.operatingHours}</div>
-                            <div class="jibun ellipsis">🏢 ${station.operator}</div>
-                            <div class="jibun ellipsis">📞 ${phoneInfo}</div>
+                            <div class="jibun ellipsis">🏢 ${operatorDisplay}</div>
                             <div class="ellipsis">${statusIcon} ${station.status} (${station.type})</div>
                             <div class="jibun ellipsis">📅 ${station.operatingPeriod}</div>
                         </div>
@@ -233,7 +252,7 @@ class MapManager {
         this.userLocationMarker = new kakao.maps.Marker({
             position: position,
             image: userMarkerImage,
-            zIndex: 10 // 다른 마커보다 위에 표시
+            zIndex: 0 // 가장 뒤에 표시
         });
         
         this.userLocationMarker.setMap(this.map);
@@ -242,7 +261,8 @@ class MapManager {
         const userOverlay = new kakao.maps.CustomOverlay({
             position: position,
             content: this.createUserLocationInfoContent(),
-            yAnchor: 2.5
+            yAnchor: 2.5,
+            zIndex: 1000 // 정보창을 가장 위에 표시
         });
         
         // 사용자 위치 마커 클릭시 정보창 표시

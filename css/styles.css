@@ -198,6 +198,7 @@ body {
     font-size: 12px;
     font-family: 'Malgun Gothic', dotum, '돋움', sans-serif;
     line-height: 1.5;
+    z-index: 1000; /* 다른 모든 요소보다 위에 표시 */
 }
 
 .wrap * {

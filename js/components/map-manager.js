@@ -6,6 +6,7 @@ class MapManager {
         this.markers = [];
         this.currentOverlay = null;
         this.markerImage = null;
+        this.userLocationMarker = null; // 사용자 위치 마커
     }
 
     async initialize() {
@@ -44,6 +45,32 @@ class MapManager {
         const imageOption = {offset: new kakao.maps.Point(20, 50)};
         this.markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize, imageOption);
         console.log('예쁜 생수 마커 이미지 설정 완료');
+    }
+
+    setupUserLocationMarkerImage() {
+        // 사용자 위치 마커 이미지 생성 (빨간색 원)
+        const svgContent = `
+            <svg width="30" height="30" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg">
+                <!-- 외부 원 (맥동 효과) -->
+                <circle cx="15" cy="15" r="14" fill="#FF5722" opacity="0.3">
+                    <animate attributeName="r" values="14;18;14" dur="2s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.3;0.1;0.3" dur="2s" repeatCount="indefinite"/>
+                </circle>
+                <!-- 중간 원 -->
+                <circle cx="15" cy="15" r="10" fill="#FF5722" opacity="0.7"/>
+                <!-- 내부 원 (중심) -->
+                <circle cx="15" cy="15" r="6" fill="#D32F2F"/>
+                <!-- 중앙 점 -->
+                <circle cx="15" cy="15" r="3" fill="white"/>
+                <!-- 십자 표시 -->
+                <path d="M15 9 L15 21 M9 15 L21 15" stroke="white" stroke-width="1.5"/>
+            </svg>
+        `;
+        
+        const svgDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgContent);
+        const imageSize = new kakao.maps.Size(30, 30);
+        const imageOption = {offset: new kakao.maps.Point(15, 15)};
+        return new kakao.maps.MarkerImage(svgDataUrl, imageSize, imageOption);
     }
 
     async loadAndDisplayStations() {
@@ -130,16 +157,6 @@ class MapManager {
         }
     }
 
-    async filterByType(type) {
-        if (type) {
-            const stations = await this.waterStationService.getStationsByFilter({type});
-            this.clearMarkers();
-            stations.forEach(station => this.addMarker(station));
-        } else {
-            await this.loadAndDisplayStations();
-        }
-    }
-
     async searchStations(query) {
         if (query.trim()) {
             const stations = await this.waterStationService.getStationsByFilter({search: query});
@@ -157,6 +174,9 @@ class MapManager {
         );
         this.clearMarkers();
         stations.forEach(station => this.addMarker(station));
+        
+        // 사용자 위치 마커 표시
+        this.showUserLocation(userLat, userLng);
         
         // 사용자 위치 중심으로 지도 이동
         const userPosition = new kakao.maps.LatLng(userLat, userLng);
@@ -180,5 +200,71 @@ class MapManager {
             bounds.extend(marker.getPosition());
         });
         this.map.setBounds(bounds);
+    }
+
+    // 사용자 위치 마커 표시
+    showUserLocation(lat, lng) {
+        // 기존 사용자 위치 마커 제거
+        this.removeUserLocation();
+        
+        const position = new kakao.maps.LatLng(lat, lng);
+        const userMarkerImage = this.setupUserLocationMarkerImage();
+        
+        this.userLocationMarker = new kakao.maps.Marker({
+            position: position,
+            image: userMarkerImage,
+            zIndex: 10 // 다른 마커보다 위에 표시
+        });
+        
+        this.userLocationMarker.setMap(this.map);
+        
+        // 사용자 위치에 정보창 추가
+        const userOverlay = new kakao.maps.CustomOverlay({
+            position: position,
+            content: this.createUserLocationInfoContent(),
+            yAnchor: 2.5
+        });
+        
+        // 사용자 위치 마커 클릭시 정보창 표시
+        kakao.maps.event.addListener(this.userLocationMarker, 'click', () => {
+            this.closeCurrentOverlay();
+            userOverlay.setMap(this.map);
+            this.currentOverlay = userOverlay;
+        });
+        
+        console.log('사용자 위치 마커 표시 완료:', lat, lng);
+    }
+    
+    // 사용자 위치 마커 제거
+    removeUserLocation() {
+        if (this.userLocationMarker) {
+            this.userLocationMarker.setMap(null);
+            this.userLocationMarker = null;
+        }
+    }
+    
+    // 사용자 위치 정보창 내용 생성
+    createUserLocationInfoContent() {
+        return `
+            <div class="wrap">
+                <div class="info">
+                    <div class="title">
+                        📍 내 위치
+                        <div class="close" onclick="closeOverlay()" title="닫기"></div>
+                    </div>
+                    <div class="body">
+                        <div class="img">
+                            <div style="width:73px;height:70px;background:#ffebee;display:flex;align-items:center;justify-content:center;font-size:24px;">🎯</div>
+                        </div>
+                        <div class="desc">
+                            <div class="ellipsis"><strong>현재 위치</strong></div>
+                            <div class="jibun ellipsis">📱 GPS로 확인된 위치</div>
+                            <div class="jibun ellipsis">🚰 주변 생수 제공소를 확인하세요</div>
+                            <div class="ellipsis">정확도: ±10-50m</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 }

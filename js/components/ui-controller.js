@@ -8,6 +8,7 @@ class UIController {
     initialize() {
         this.setupEventListeners();
         this.setupGeolocation();
+        this.setupMobileControls();
         console.log('UI 컨트롤러 초기화 완료');
     }
 
@@ -17,14 +18,6 @@ class UIController {
         if (districtFilter) {
             districtFilter.addEventListener('change', (e) => {
                 this.handleDistrictFilter(e.target.value);
-            });
-        }
-
-        // 타입 필터
-        const typeFilter = document.getElementById('typeFilter');
-        if (typeFilter) {
-            typeFilter.addEventListener('change', (e) => {
-                this.handleTypeFilter(e.target.value);
             });
         }
 
@@ -91,6 +84,7 @@ class UIController {
     async handleDistrictFilter(district) {
         try {
             this.showLoading(true);
+            this.mapManager.removeUserLocation(); // 사용자 위치 마커 제거
             await this.mapManager.filterByDistrict(district);
             this.clearOtherFilters('district');
             console.log('구 필터 적용:', district || '전체');
@@ -102,23 +96,10 @@ class UIController {
         }
     }
 
-    async handleTypeFilter(type) {
-        try {
-            this.showLoading(true);
-            await this.mapManager.filterByType(type);
-            this.clearOtherFilters('type');
-            console.log('타입 필터 적용:', type || '전체');
-        } catch (error) {
-            console.error('타입 필터 처리 실패:', error);
-            this.showError('타입 필터를 적용하는데 실패했습니다.');
-        } finally {
-            this.showLoading(false);
-        }
-    }
-
     async handleSearch(query) {
         try {
             this.showLoading(true);
+            this.mapManager.removeUserLocation(); // 사용자 위치 마커 제거
             await this.mapManager.searchStations(query);
             this.clearOtherFilters('search');
             console.log('검색 실행:', query || '전체');
@@ -168,6 +149,7 @@ class UIController {
     async handleShowAll() {
         try {
             this.showLoading(true);
+            this.mapManager.removeUserLocation(); // 사용자 위치 마커 제거
             await this.mapManager.loadAndDisplayStations();
             this.clearAllFilters();
             this.mapManager.fitBounds();
@@ -212,11 +194,6 @@ class UIController {
             if (districtFilter) districtFilter.value = '';
         }
 
-        if (exceptType !== 'type') {
-            const typeFilter = document.getElementById('typeFilter');
-            if (typeFilter) typeFilter.value = '';
-        }
-
         if (exceptType !== 'search') {
             const searchInput = document.getElementById('searchInput');
             if (searchInput) searchInput.value = '';
@@ -254,6 +231,116 @@ class UIController {
             }
         } catch (error) {
             console.error('통계 정보 업데이트 실패:', error);
+        }
+    }
+
+    setupMobileControls() {
+        // 모바일에서만 실행
+        if (window.innerWidth <= 768) {
+            const controls = document.getElementById('controls');
+            if (!controls) return;
+
+            let isCollapsed = false;
+            let startY = 0;
+            let currentY = 0;
+            let initialHeight = 0;
+
+            // 터치 이벤트 리스너
+            controls.addEventListener('touchstart', (e) => {
+                if (e.target === controls || e.target === controls.querySelector('h3')) {
+                    startY = e.touches[0].clientY;
+                    initialHeight = controls.offsetHeight;
+                    controls.style.transition = 'none';
+                }
+            }, { passive: true });
+
+            controls.addEventListener('touchmove', (e) => {
+                if (startY === 0) return;
+                
+                currentY = e.touches[0].clientY;
+                const deltaY = currentY - startY;
+                
+                // 아래로 드래그시 패널 축소
+                if (deltaY > 0) {
+                    const newHeight = Math.max(60, initialHeight - deltaY);
+                    controls.style.maxHeight = newHeight + 'px';
+                }
+            }, { passive: true });
+
+            controls.addEventListener('touchend', () => {
+                if (startY === 0) return;
+                
+                const deltaY = currentY - startY;
+                controls.style.transition = 'all 0.3s ease';
+                
+                // 50px 이상 드래그시 접기/펼치기
+                if (Math.abs(deltaY) > 50) {
+                    if (deltaY > 0 && !isCollapsed) {
+                        // 접기
+                        this.collapseControls();
+                        isCollapsed = true;
+                    } else if (deltaY < 0 && isCollapsed) {
+                        // 펼치기
+                        this.expandControls();
+                        isCollapsed = false;
+                    }
+                } else {
+                    // 원래 상태로 복구
+                    if (isCollapsed) {
+                        this.collapseControls();
+                    } else {
+                        this.expandControls();
+                    }
+                }
+                
+                startY = 0;
+                currentY = 0;
+            });
+
+            // 헤더 클릭으로도 토글 가능
+            const header = controls.querySelector('h3');
+            if (header) {
+                header.addEventListener('click', () => {
+                    if (isCollapsed) {
+                        this.expandControls();
+                        isCollapsed = false;
+                    } else {
+                        this.collapseControls();
+                        isCollapsed = true;
+                    }
+                });
+                
+                // 헤더에 화살표 아이콘 추가
+                header.innerHTML = '🚰 생수 제공 위치 찾기 <span style="float: right; font-size: 12px;">⬆️</span>';
+            }
+        }
+    }
+
+    collapseControls() {
+        const controls = document.getElementById('controls');
+        if (controls) {
+            controls.style.maxHeight = '60px';
+            controls.style.overflow = 'hidden';
+            
+            const header = controls.querySelector('h3');
+            if (header) {
+                const arrow = header.querySelector('span');
+                if (arrow) arrow.innerHTML = '⬇️';
+            }
+        }
+    }
+
+    expandControls() {
+        const controls = document.getElementById('controls');
+        if (controls) {
+            controls.style.maxHeight = '45vh';
+            controls.style.overflow = 'auto';
+            
+            const header = controls.querySelector('h3');
+            if (header) {
+                const arrow = header.querySelector('span');
+                if (arrow) arrow.innerHTML = '⬆️';
+            }
         }
     }
 }

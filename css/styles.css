@@ -329,51 +329,195 @@ body {
 
 /* 반응형 디자인 */
 @media (max-width: 768px) {
+    /* 컨트롤 패널 - 접을 수 있는 형태로 변경 */
     #controls {
         position: fixed;
         top: auto;
-        bottom: 15px;
-        left: 15px;
-        right: 15px;
+        bottom: 0;
+        left: 0;
+        right: 0;
         min-width: auto;
-        max-height: 50vh;
+        max-height: 45vh;
         overflow-y: auto;
+        border-radius: 15px 15px 0 0;
+        padding: 15px;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+        transform: translateY(0);
+        transition: transform 0.3s ease;
+        z-index: 200;
     }
 
+    /* 컨트롤 패널 헤더에 핸들 추가 */
+    #controls::before {
+        content: '';
+        display: block;
+        width: 40px;
+        height: 4px;
+        background: #ddd;
+        border-radius: 2px;
+        margin: 0 auto 15px auto;
+        cursor: grab;
+    }
+
+    #controls h3 {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 16px;
+    }
+
+    /* 버튼들을 더 작게 */
     .control-row {
-        flex-direction: column;
+        flex-direction: row;
+        gap: 8px;
     }
 
+    #controls select, 
+    #controls input, 
+    #controls button {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+
+    /* 정보창 크기 조정 */
     .wrap {
         width: 280px;
+        height: 140px;
         margin-left: -140px;
     }
 
     .wrap .info {
         width: 278px;
+        height: 128px;
     }
 
     .info .desc {
-        margin: 12px 0 0 80px;
-        padding-right: 10px;
+        margin: 10px 0 0 70px;
+        padding-right: 8px;
+        height: 85px;
     }
 
     .info .img {
-        width: 65px;
-        height: 65px;
+        width: 60px;
+        height: 60px;
+        top: 6px;
+        left: 6px;
     }
 
+    .desc .ellipsis {
+        font-size: 12px;
+        margin-bottom: 3px;
+    }
+
+    .desc .ellipsis strong {
+        font-size: 13px;
+    }
+
+    .desc .jibun {
+        font-size: 11px;
+    }
+
+    /* 통계 정보 위치 변경 - 상단 중앙으로 */
     #stats {
-        top: auto;
-        bottom: 200px;
-        right: 15px;
-        left: auto;
+        position: fixed;
+        top: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        right: auto;
+        bottom: auto;
+        padding: 8px 15px;
+        font-size: 12px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        z-index: 150;
     }
 
     #stats span {
-        display: block;
+        display: inline-block;
+        margin-right: 10px;
+        margin-bottom: 0;
+        font-size: 12px;
+    }
+
+    #stats span:last-child {
         margin-right: 0;
-        margin-bottom: 5px;
+    }
+
+    /* 로딩 화면 조정 */
+    #loading {
+        padding: 15px 20px;
+        font-size: 14px;
+    }
+}
+
+/* 더 작은 화면을 위한 추가 조정 */
+@media (max-width: 480px) {
+    #controls {
+        padding: 12px;
+        max-height: 40vh;
+    }
+
+    #controls h3 {
+        font-size: 15px;
+        margin-bottom: 15px;
+    }
+
+    .control-group {
+        margin-bottom: 12px;
+    }
+
+    #controls select, 
+    #controls input, 
+    #controls button {
+        padding: 7px 8px;
+        font-size: 12px;
+    }
+
+    /* 정보창 더 작게 */
+    .wrap {
+        width: 260px;
+        height: 130px;
+        margin-left: -130px;
+    }
+
+    .wrap .info {
+        width: 258px;
+        height: 118px;
+    }
+
+    .info .desc {
+        margin: 8px 0 0 60px;
+        padding-right: 6px;
+        height: 80px;
+    }
+
+    .info .img {
+        width: 50px;
+        height: 50px;
+    }
+
+    .info .title {
+        padding: 6px 0 0 10px;
+        height: 30px;
+        font-size: 14px;
+    }
+
+    .info .close {
+        top: 6px;
+        right: 8px;
+        width: 18px;
+        height: 18px;
+    }
+
+    /* 통계 정보 더 작게 */
+    #stats {
+        padding: 6px 12px;
+        font-size: 11px;
+    }
+
+    #stats span {
+        margin-right: 8px;
+        font-size: 11px;
     }
 }
 

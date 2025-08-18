@@ -1,0 +1,93 @@
+[
+  {
+    "id": "junggu",
+    "name": "중구",
+    "fullName": "서울특별시 중구청",
+    "phone": "02-3396-4000",
+    "website": "https://www.junggu.seoul.kr",
+    "address": "서울특별시 중구 세종대로 110",
+    "emergencyPhone": "02-3396-4000",
+    "waterSupplyDept": "환경위생과",
+    "waterSupplyPhone": "02-3396-4000",
+    "operatingPeriod": "2025년 7~8월",
+    "description": "중구 오!빙고! 생수 제공소 운영"
+  },
+  {
+    "id": "jungnanggu",
+    "name": "중랑구",
+    "fullName": "서울특별시 중랑구청",
+    "phone": "02-2094-1000",
+    "website": "https://www.jungnang.go.kr",
+    "address": "서울특별시 중랑구 봉우재로 110",
+    "emergencyPhone": "02-2094-1000",
+    "waterSupplyDept": "청소행정과",
+    "waterSupplyPhone": "02-2094-1000",
+    "operatingPeriod": "7/15~8/18",
+    "description": "중랑옹달샘 생수 제공소 운영"
+  },
+  {
+    "id": "seongbukgu",
+    "name": "성북구",
+    "fullName": "서울특별시 성북구청",
+    "phone": "02-2241-1000",
+    "website": "https://www.seongbuk.go.kr",
+    "address": "서울특별시 성북구 보문로 168",
+    "emergencyPhone": "02-2241-1000",
+    "waterSupplyDept": "환경과",
+    "waterSupplyPhone": "02-2241-1000",
+    "operatingPeriod": "7/15~8/15",
+    "description": "생수나눔 냉장고 운영"
+  },
+  {
+    "id": "dobonggu",
+    "name": "도봉구",
+    "fullName": "서울특별시 도봉구청",
+    "phone": "02-2091-2000",
+    "website": "https://www.dobong.go.kr",
+    "address": "서울특별시 도봉구 마들로 656",
+    "emergencyPhone": "02-2091-2000",
+    "waterSupplyDept": "청소환경과",
+    "waterSupplyPhone": "02-2091-2000",
+    "operatingPeriod": "7/10~8/9",
+    "description": "봉달샘 생수 제공소 운영"
+  },
+  {
+    "id": "nowongu",
+    "name": "노원구",
+    "fullName": "서울특별시 노원구청",
+    "phone": "02-2116-3000",
+    "website": "https://www.nowon.kr",
+    "address": "서울특별시 노원구 노원로 283",
+    "emergencyPhone": "02-2116-3000",
+    "waterSupplyDept": "청소환경과",
+    "waterSupplyPhone": "02-2116-3000",
+    "operatingPeriod": "7/15~8/25",
+    "description": "힐링 냉장고 운영"
+  },
+  {
+    "id": "mapogu",
+    "name": "마포구",
+    "fullName": "서울특별시 마포구청",
+    "phone": "02-3153-8000",
+    "website": "https://www.mapo.go.kr",
+    "address": "서울특별시 마포구 월드컵로 212",
+    "emergencyPhone": "02-3153-8000",
+    "waterSupplyDept": "청소행정과",
+    "waterSupplyPhone": "02-3153-8000",
+    "operatingPeriod": "8/1~9/30",
+    "description": "마포샘터 냉장고(전화인증) 운영"
+  },
+  {
+    "id": "gangbukgu",
+    "name": "강북구",
+    "fullName": "서울특별시 강북구청",
+    "phone": "02-901-6000",
+    "website": "https://www.gangbuk.go.kr",
+    "address": "서울특별시 강북구 도봉로 377",
+    "emergencyPhone": "02-901-6000",
+    "waterSupplyDept": "청소행정과",
+    "waterSupplyPhone": "02-901-6000",
+    "operatingPeriod": "2025년 7~8월",
+    "description": "강북구 생수 제공소 운영"
+  }
+]

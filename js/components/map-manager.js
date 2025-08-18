@@ -14,6 +14,10 @@ class MapManager {
         try {
             await this.createMap();
             this.setupMarkerImage();
+            
+            // 구청 정보 로드
+            await window.districtManager.loadDistricts();
+            
             await this.loadAndDisplayStations();
             
             // 초기 사용자 위치가 있으면 마커 표시
@@ -131,18 +135,8 @@ class MapManager {
     createStationInfoContent(station) {
         const statusIcon = station.status === "운영중" ? "✅" : "❌";
         
-        // 구청별 전화번호 매핑
-        const districtPhones = {
-            '중구': '02-3396-4000',
-            '중랑구': '02-2094-1000',
-            '성북구': '02-2241-1000',
-            '도봉구': '02-2091-2000',
-            '노원구': '02-2116-3000',
-            '마포구': '02-3153-8000',
-            '강북구': '02-901-6000'
-        };
-        
-        const phone = districtPhones[station.district] || '';
+        // 구청 정보 가져오기
+        const phone = window.districtManager.getDistrictPhone(station.district);
         const isMobile = window.innerWidth <= 768;
         
         // 모바일에서는 구청 이름을 클릭 가능한 전화링크로 만들기

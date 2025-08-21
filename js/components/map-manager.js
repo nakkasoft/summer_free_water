@@ -138,8 +138,6 @@ class MapManager {
     }
 
     createStationInfoContent(station) {
-        const statusIcon = station.status === "운영중" ? "✅" : "❌";
-        
         // 구청 정보 가져오기
         const phone = window.districtManager.getDistrictPhone(station.district);
         const isMobile = window.innerWidth <= 768;
@@ -148,12 +146,52 @@ class MapManager {
         const operatorDisplay = isMobile && phone 
             ? `<a href="tel:${phone}" style="color: #0066cc; text-decoration: none;">${station.operator}</a>`
             : station.operator;
+
+        // 사업이름 추출 함수
+        function extractProjectName(title) {
+            if (title.includes('힐링 냉장고')) {
+                return '힐링 냉장고';
+            } else if (title.includes('오!빙고!')) {
+                return '오!빙고!';
+            } else if (title.includes('중랑옹달샘')) {
+                return '중랑옹달샘';
+            } else if (title.includes('봉달샘')) {
+                return '봉달샘';
+            } else if (title.includes('마포샘터')) {
+                return '마포샘터';
+            } else if (title.includes('생수나눔')) {
+                return '생수나눔 냉장고';
+            } else {
+                // 사업이름을 찾을 수 없으면 구청이름 반환
+                return station.operator;
+            }
+        }
+
+        // 위치정보 추출 함수 (사업명 제거)
+        function extractLocationOnly(title) {
+            let location = title;
+            // 각 사업명 패턴을 제거하여 위치정보만 남김
+            location = location.replace(/힐링 냉장고\s*/, '');
+            location = location.replace(/오!빙고!\s*/, '');
+            location = location.replace(/중랑옹달샘\s*/, '');
+            location = location.replace(/봉달샘\s*/, '');
+            location = location.replace(/마포샘터\s*/, '');
+            location = location.replace(/생수나눔\s*(냉장고)?\s*/, '');
+            location = location.replace(/냉장고\s*/, '');
+            return location.trim();
+        }
+
+        const projectName = extractProjectName(station.title);
+        const locationOnly = extractLocationOnly(station.title);
+        
+        // 운영시간에서 불필요한 텍스트 정리
+        const cleanOperatingHours = station.operatingHours.replace(/시간$/, '').trim();
         
         return `
             <div class="wrap">
                 <div class="info">
                     <div class="title">
-                        🚰 ${station.title}
+                        🚰 ${locationOnly}
                         <div class="close" onclick="closeOverlay()" title="닫기"></div>
                     </div>
                     <div class="body">
@@ -161,24 +199,37 @@ class MapManager {
                             <div style="width:73px;height:70px;background:#f0f8ff;display:flex;align-items:center;justify-content:center;font-size:24px;">💧</div>
                         </div>
                         <div class="desc">
-                            <div class="jibun ellipsis">⏰ ${station.operatingHours}</div>
-                            <div class="jibun ellipsis">🏢 ${operatorDisplay}</div>
-                            <div class="ellipsis">${statusIcon} ${station.status} (${station.type})</div>
-                            <div class="jibun ellipsis">📅 ${station.operatingPeriod}</div>
-                            <div style="margin-top: 10px; text-align: center;">
-                                <button onclick="alert('신고 기능 테스트: ' + '${station.title}')" 
+                            <div style="margin-bottom: 6px; font-size: 13px; color: #333; font-weight: bold;">
+                                ${station.status} (${cleanOperatingHours})
+                            </div>
+                            <div style="margin-bottom: 6px; font-size: 13px; color: #666;">
+                                ${station.operatingPeriod}
+                            </div>
+                            <div style="margin-bottom: 10px; font-size: 14px;">
+                                ${projectName} (${operatorDisplay})
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <select onchange="if(this.value) { alert('신고 유형: ' + this.value + '\\n대상: ${station.title}'); this.value=''; }" 
                                         style="
                                             background: #ff4444;
                                             color: white;
                                             border: none;
-                                            padding: 8px 16px;
+                                            padding: 6px 12px;
                                             border-radius: 4px;
                                             cursor: pointer;
-                                            font-size: 12px;
+                                            font-size: 11px;
                                             width: 100%;
+                                            appearance: none;
+                                            -webkit-appearance: none;
+                                            -moz-appearance: none;
                                         ">
-                                    ⚠️ 정보 오류 신고 (테스트)
-                                </button>
+                                    <option value="">⚠️ 정보 오류 신고</option>
+                                    <option value="운영시간 오류">운영시간이 틀려요</option>
+                                    <option value="운영상태 오류">운영상태가 틀려요</option>
+                                    <option value="위치 오류">위치가 틀려요</option>
+                                    <option value="시설 문제">시설에 문제가 있어요</option>
+                                    <option value="기타">기타 문제</option>
+                                </select>
                             </div>
                         </div>
                     </div>

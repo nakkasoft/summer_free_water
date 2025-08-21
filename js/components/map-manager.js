@@ -165,7 +165,21 @@ class MapManager {
                             <div class="jibun ellipsis">🏢 ${operatorDisplay}</div>
                             <div class="ellipsis">${statusIcon} ${station.status} (${station.type})</div>
                             <div class="jibun ellipsis">📅 ${station.operatingPeriod}</div>
-                            ${window.errorReportUI ? window.errorReportUI.createReportButton(station.id, station.title) : ''}
+                            <div style="margin-top: 10px; text-align: center;">
+                                <button onclick="alert('신고 기능 테스트: ' + '${station.title}')" 
+                                        style="
+                                            background: #ff4444;
+                                            color: white;
+                                            border: none;
+                                            padding: 8px 16px;
+                                            border-radius: 4px;
+                                            cursor: pointer;
+                                            font-size: 12px;
+                                            width: 100%;
+                                        ">
+                                    ⚠️ 정보 오류 신고 (테스트)
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

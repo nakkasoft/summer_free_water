@@ -9,11 +9,24 @@ class SupabaseDatabase extends DatabaseInterface {
 
     async connect() {
         try {
-            // Supabase 클라이언트 초기화 (실제 구현시에는 supabase-js 라이브러리 필요)
-            // this.client = createClient(this.url, this.anonKey);
-            console.log('Supabase 연결 시도... (아직 구현되지 않음)');
-            this.connected = false;
-            return false;
+            // Supabase 클라이언트 초기화
+            if (typeof supabase !== 'undefined') {
+                this.client = supabase.createClient(this.url, this.anonKey);
+                
+                // 연결 테스트
+                const { data, error } = await this.client.from('error_reports').select('count', { count: 'exact', head: true });
+                
+                if (error && error.code !== 'PGRST116') { // 테이블이 없는 경우는 무시
+                    console.warn('Supabase 연결 경고:', error.message);
+                }
+                
+                this.connected = true;
+                console.log('Supabase 연결 성공');
+                return true;
+            } else {
+                console.error('Supabase 라이브러리가 로드되지 않았습니다.');
+                return false;
+            }
         } catch (error) {
             console.error('Supabase 연결 실패:', error);
             this.connected = false;

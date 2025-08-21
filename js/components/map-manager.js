@@ -18,6 +18,11 @@ class MapManager {
             // 구청 정보 로드
             await window.districtManager.loadDistricts();
             
+            // 오류 신고 시스템 초기화
+            if (window.errorReportManager) {
+                await window.errorReportManager.initialize();
+            }
+            
             await this.loadAndDisplayStations();
             
             // 초기 사용자 위치가 있으면 마커 표시
@@ -160,6 +165,7 @@ class MapManager {
                             <div class="jibun ellipsis">🏢 ${operatorDisplay}</div>
                             <div class="ellipsis">${statusIcon} ${station.status} (${station.type})</div>
                             <div class="jibun ellipsis">📅 ${station.operatingPeriod}</div>
+                            ${window.errorReportUI ? window.errorReportUI.createReportButton(station.id, station.title) : ''}
                         </div>
                     </div>
                 </div>

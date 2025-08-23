@@ -188,10 +188,10 @@ class MapManager {
         }
 
         const isOperating = isCurrentlyOperating(station.operatingHours, station.status);
-        const statusColor = isOperating ? '#0066cc' : '#666666'; // 파란색 또는 진한 회색
-        const statusIcon = isOperating ? '🟦' : '⬜'; // 파란 사각형 또는 회색 사각형
-        const waterDropColor = isOperating ? '#0066cc' : '#666666'; // 물방울: 파란색 또는 진한 회색
-        const titleTextColor = isOperating ? '#ffffff' : '#666666'; // 타이틀 글자: 흰색 또는 회색
+        const statusColor = isOperating ? '#0066cc' : '#dc3545'; // 파란색 또는 빨간색
+        const statusIcon = isOperating ? '🟦' : '🟥'; // 파란 사각형 또는 빨간 사각형
+        const waterDropColor = isOperating ? '#0066cc' : '#dc3545'; // 물방울: 파란색 또는 빨간색
+        const titleTextColor = '#ffffff'; // 타이틀 글자: 항상 흰색
 
         // 사업이름 추출 함수
         function extractProjectName(title) {

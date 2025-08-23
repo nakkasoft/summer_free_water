@@ -147,6 +147,52 @@ class MapManager {
             ? `<a href="tel:${phone}" style="color: #0066cc; text-decoration: none;">${station.operator}</a>`
             : station.operator;
 
+        // 실제 운영시간 체크 함수
+        function isCurrentlyOperating(operatingHours, status) {
+            // 기본적으로 status가 "운영중"이 아니면 운영 안함
+            if (status !== "운영중") return false;
+            
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            const currentTime = currentHour * 60 + currentMinute; // 분 단위로 변환
+            
+            // 운영시간 파싱
+            const timeMatch = operatingHours.match(/(\d{1,2}):(\d{2})[~-](\d{1,2}):(\d{2})/);
+            if (!timeMatch) {
+                // 특수한 경우들 처리
+                if (operatingHours.includes('24시간') || operatingHours.includes('상시')) return true;
+                if (operatingHours.includes('생수소진시까지') || operatingHours.includes('소진시')) {
+                    // 일반적으로 오전 10시부터 오후 6시까지로 가정
+                    return currentTime >= 600 && currentTime <= 1080; // 10:00-18:00
+                }
+                return true; // 파싱 실패시 기본적으로 운영중으로 표시
+            }
+            
+            const startHour = parseInt(timeMatch[1]);
+            const startMinute = parseInt(timeMatch[2]);
+            const endHour = parseInt(timeMatch[3]);
+            const endMinute = parseInt(timeMatch[4]);
+            
+            const startTime = startHour * 60 + startMinute;
+            const endTime = endHour * 60 + endMinute;
+            
+            // 시간 범위 체크
+            if (startTime <= endTime) {
+                // 일반적인 경우 (예: 09:00-18:00)
+                return currentTime >= startTime && currentTime <= endTime;
+            } else {
+                // 자정을 넘어가는 경우 (예: 22:00-06:00)
+                return currentTime >= startTime || currentTime <= endTime;
+            }
+        }
+
+        const isOperating = isCurrentlyOperating(station.operatingHours, station.status);
+        const statusColor = isOperating ? '#0066cc' : '#666666'; // 파란색 또는 진한 회색
+        const statusIcon = isOperating ? '🟦' : '⬜'; // 파란 사각형 또는 회색 사각형
+        const waterDropColor = isOperating ? '#0066cc' : '#666666'; // 물방울: 파란색 또는 진한 회색
+        const titleTextColor = isOperating ? '#ffffff' : '#666666'; // 타이틀 글자: 흰색 또는 회색
+
         // 사업이름 추출 함수
         function extractProjectName(title) {
             if (title.includes('힐링 냉장고')) {
@@ -191,16 +237,16 @@ class MapManager {
             <div class="wrap">
                 <div class="info">
                     <div class="title">
-                        🚰 ${locationOnly}
+                        <span style="color: ${titleTextColor};">🚰 ${locationOnly}</span>
                         <div class="close" onclick="closeOverlay()" title="닫기"></div>
                     </div>
                     <div class="body">
                         <div class="img">
-                            <div style="width:73px;height:70px;background:#f0f8ff;display:flex;align-items:center;justify-content:center;font-size:24px;">💧</div>
+                            <div style="width:73px;height:70px;background:#f0f8ff;display:flex;align-items:center;justify-content:center;font-size:24px;color:${waterDropColor};">💧</div>
                         </div>
                         <div class="desc">
-                            <div style="margin-bottom: 6px; font-size: 13px; color: #333; font-weight: bold;">
-                                ${station.status} (${cleanOperatingHours})
+                            <div style="margin-bottom: 6px; font-size: 13px; color: ${statusColor}; font-weight: bold;">
+                                ${statusIcon} ${isOperating ? '운영중' : '운영종료'} (${cleanOperatingHours})
                             </div>
                             <div style="margin-bottom: 6px; font-size: 13px; color: #666;">
                                 ${station.operatingPeriod}
@@ -208,8 +254,12 @@ class MapManager {
                             <div style="margin-bottom: 10px; font-size: 14px;">
                                 ${projectName} (${operatorDisplay})
                             </div>
-                            <div style="margin-top: 8px;">
-                                <select onchange="if(this.value) { alert('신고 유형: ' + this.value + '\\n대상: ${station.title}'); this.value=''; }" 
+                                <div style="margin-top: 8px;">
+                                    <select 
+                                        id="error-report-select-${station.id}"
+                                        data-station-id="${station.id}"
+                                        data-station-title="${station.title}"
+                                        onchange="window.handleErrorReportSelect(this)"
                                         style="
                                             background: #ff4444;
                                             color: white;
@@ -223,14 +273,14 @@ class MapManager {
                                             -webkit-appearance: none;
                                             -moz-appearance: none;
                                         ">
-                                    <option value="">⚠️ 정보 오류 신고</option>
-                                    <option value="운영시간 오류">운영시간이 틀려요</option>
-                                    <option value="운영상태 오류">운영상태가 틀려요</option>
-                                    <option value="위치 오류">위치가 틀려요</option>
-                                    <option value="시설 문제">시설에 문제가 있어요</option>
-                                    <option value="기타">기타 문제</option>
-                                </select>
-                            </div>
+                                        <option value="">⚠️ 정보 오류 신고</option>
+                                        <option value="운영시간 오류">운영시간이 틀려요</option>
+                                        <option value="운영상태 오류">운영상태가 틀려요</option>
+                                        <option value="위치 오류">위치가 틀려요</option>
+                                        <option value="시설 문제">시설에 문제가 있어요</option>
+                                        <option value="기타">기타 문제</option>
+                                    </select>
+                                </div>
                         </div>
                     </div>
                 </div>

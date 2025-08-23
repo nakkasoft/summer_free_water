@@ -87,12 +87,12 @@ class ErrorReportManager {
                 station_id: parseInt(reportData.stationId),
                 station_title: reportData.stationTitle,
                 error_type: reportData.errorType,
-                description: reportData.description,
+                description: reportData.description || `${reportData.errorType} 신고`,
                 contact_info: reportData.contactInfo || '',
-                reporter_ip: await this.getClientIP(),
-                user_agent: navigator.userAgent,
                 priority: this.calculatePriority(reportData.errorType)
             };
+
+            console.log('Supabase에 전송할 데이터:', report);
 
             // Supabase에 데이터 삽입
             const { data, error } = await this.client
@@ -102,6 +102,13 @@ class ErrorReportManager {
             
             if (error) {
                 console.error('Supabase 삽입 오류:', error);
+                console.error('전송한 데이터:', report);
+                console.error('오류 세부사항:', {
+                    message: error.message,
+                    details: error.details,
+                    hint: error.hint,
+                    code: error.code
+                });
                 return this.fallbackSubmit(reportData);
             }
 

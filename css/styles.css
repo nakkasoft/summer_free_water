@@ -470,19 +470,19 @@ body {
     /* 정보창 더 작게 */
     .wrap {
         width: 280px; /* 260px에서 280px로 증가 */
-        height: 200px; /* 180px에서 200px로 증가 */
+        height: 158px; /* 180px에서 200px로 증가 */
         margin-left: -140px; /* -130px에서 -140px로 조정 */
     }
 
     .wrap .info {
         width: 278px; /* 258px에서 278px로 증가 */
-        height: 188px; /* 168px에서 188px로 증가 */
+        height: 158px; /* 168px에서 188px로 증가 */
     }
 
     .info .desc {
         margin: 8px 0 0 60px;
         padding-right: 6px;
-        height: 180px; /* 120px에서 140px로 증가 */
+        height: 158px; /* 120px에서 140px로 증가 */
     }
 
     .info .img {

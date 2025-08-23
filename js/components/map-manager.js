@@ -245,16 +245,16 @@ class MapManager {
                             <div style="width:73px;height:70px;background:#f0f8ff;display:flex;align-items:center;justify-content:center;font-size:24px;color:${waterDropColor};">💧</div>
                         </div>
                         <div class="desc">
-                            <div style="margin-bottom: 6px; font-size: 13px; color: ${statusColor}; font-weight: bold;">
+                            <div style="margin-bottom: 4px; font-size: 13px; color: ${statusColor}; font-weight: bold;">
                                 ${statusIcon} ${isOperating ? '운영중' : '운영종료'} (${cleanOperatingHours})
                             </div>
-                            <div style="margin-bottom: 6px; font-size: 13px; color: #666;">
+                            <div style="margin-bottom: 4px; font-size: 13px; color: #666;">
                                 ${station.operatingPeriod}
                             </div>
-                            <div style="margin-bottom: 10px; font-size: 14px;">
+                            <div style="margin-bottom: 6px; font-size: 14px;">
                                 ${projectName} (${operatorDisplay})
                             </div>
-                                <div style="margin-top: 8px;">
+                                <div style="margin-top: 4px;">
                                     <select 
                                         id="error-report-select-${station.id}"
                                         data-station-id="${station.id}"
@@ -264,14 +264,15 @@ class MapManager {
                                             background: #ff4444;
                                             color: white;
                                             border: none;
-                                            padding: 6px 12px;
+                                            padding: 4px 8px;
                                             border-radius: 4px;
                                             cursor: pointer;
-                                            font-size: 11px;
+                                            font-size: 10px;
                                             width: 100%;
                                             appearance: none;
                                             -webkit-appearance: none;
                                             -moz-appearance: none;
+                                            height: 28px;
                                         ">
                                         <option value="">⚠️ 정보 오류 신고</option>
                                         <option value="운영시간 오류">운영시간이 틀려요</option>

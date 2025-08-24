@@ -237,7 +237,7 @@ class MapManager {
             <div class="wrap">
                 <div class="info">
                     <div class="title">
-                        <span style="color: ${titleTextColor};">🚰 ${locationOnly}</span>
+                        <span style="color: ${titleTextColor} !important;">🚰 ${locationOnly}</span>
                         <div class="close" onclick="closeOverlay()" title="닫기"></div>
                     </div>
                     <div class="body">

@@ -68,6 +68,21 @@
     <!-- Supabase JavaScript SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
     
+    <!-- 로컬 개발용 임시 환경변수 설정 (빌드 도구 없이 직접 HTML 열 때) -->
+    <script>
+        // 빌드 도구(Vite 등) 없이 직접 HTML을 열 때만 사용
+        // window.ENV가 없으면 임시 설정
+        if (!window.ENV) {
+            window.ENV = {
+                KAKAO_API_KEY: '932066d1403575d3521925f322ec1d8b',
+                SUPABASE_URL: 'https://gmmnverhexhwboedtlai.supabase.co',
+                SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtbW52ZXJoZXhod2JvZWR0bGFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU2NTYyMDgsImV4cCI6MjA3MTIzMjIwOH0.TecIAycrP1rXJYVuDR7lz9fA0nqUWtz4QGqAPOmSdTg',
+                DATABASE_TYPE: 'supabase'
+            };
+            console.log('🔧 로컬 개발모드: 임시 환경변수 설정됨');
+        }
+    </script>
+    
     <!-- JavaScript 파일들 -->
     <script src="js/utils/config-loader.js"></script>
     <script src="js/utils/district-manager.js"></script>

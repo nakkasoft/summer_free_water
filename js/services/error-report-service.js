@@ -55,24 +55,32 @@ class ErrorReportManager {
 
     async loadConfig() {
         // config-loader와 동일한 방식으로 설정 로드
-        try {
-            const response = await fetch('.env');
-            const text = await response.text();
-            const lines = text.split('\n');
-            const config = {};
+        const getEnvVar = (name) => {
+            // 글로벌 ENV 객체 (HTML에서 설정된 경우)
+            if (typeof window !== 'undefined' && window.ENV) {
+                const value = window.ENV[name];
+                if (value) return value;
+            }
             
-            lines.forEach(line => {
-                const [key, value] = line.split('=');
-                if (key && value) {
-                    config[key.trim()] = value.trim();
-                }
-            });
+            // 서버 환경 또는 Node.js 환경
+            if (typeof process !== 'undefined' && process.env) {
+                const value = process.env[name];
+                if (value) return value;
+            }
             
-            return config;
-        } catch (error) {
-            console.error('설정 파일 로드 실패:', error);
-            return {};
-        }
+            return null;
+        };
+
+        const config = {
+            SUPABASE_URL: getEnvVar('SUPABASE_URL'),
+            SUPABASE_ANON_KEY: getEnvVar('SUPABASE_ANON_KEY')
+        };
+
+        console.log('🔍 오류 신고 서비스 환경변수 로드:');
+        console.log('- SUPABASE_URL:', config.SUPABASE_URL ? '✅ 설정됨' : '❌ 없음');
+        console.log('- SUPABASE_ANON_KEY:', config.SUPABASE_ANON_KEY ? '✅ 설정됨' : '❌ 없음');
+
+        return config;
     }
 
     // 오류 신고 제출

@@ -225,7 +225,7 @@ body {
     padding: 8px 0 0 15px;
     height: 35px;
     background: #007bff;
-    color: white;
+    color: white !important; /* 강제로 흰색 적용 */
     border-bottom: 1px solid #0056b3;
     font-size: 16px;
     font-weight: bold;

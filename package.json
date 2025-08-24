@@ -1,0 +1,16 @@
+{
+  "name": "summer-free-water",
+  "version": "1.0.0",
+  "description": "서울시 여름철 무료 생수 제공 위치 지도",
+  "scripts": {
+    "build": "node build.js",
+    "start": "serve .",
+    "dev": "serve ."
+  },
+  "devDependencies": {
+    "serve": "^14.0.0"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}

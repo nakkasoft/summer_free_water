@@ -16,6 +16,18 @@ class GlobalSupabaseClient {
 
     // 한 번만 초기화
     initialize(url, anonKey) {
+        console.log('🔍 Supabase 초기화 요청:');
+        console.log('- URL:', url ? '✅ 설정됨' : '❌ 없음');
+        console.log('- URL 값:', url);
+        console.log('- Anon Key:', anonKey ? '✅ 설정됨' : '❌ 없음');
+        console.log('- Anon Key 길이:', anonKey ? anonKey.length + '자' : 'N/A');
+        console.log('- Anon Key 시작:', anonKey ? anonKey.substring(0, 20) + '...' : 'N/A');
+        
+        if (!url || !anonKey) {
+            console.error('❌ Supabase URL 또는 Anon Key가 누락되었습니다!');
+            return null;
+        }
+        
         if (this.isInitialized && this.url === url && this.anonKey === anonKey) {
             console.log('✅ Supabase 클라이언트가 이미 초기화되었습니다.');
             return this.client;

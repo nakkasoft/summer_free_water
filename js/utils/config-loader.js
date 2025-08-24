@@ -49,6 +49,14 @@ class ConfigLoader {
 
             // Supabase 사용시 필수 환경변수 검증
             if (this.config.DATABASE_TYPE === 'supabase') {
+                console.log('🔍 Supabase 환경변수 상세 검증:');
+                console.log('- SUPABASE_URL 존재:', !!this.config.SUPABASE_URL);
+                console.log('- SUPABASE_URL 값:', this.config.SUPABASE_URL || 'undefined');
+                console.log('- SUPABASE_URL 길이:', this.config.SUPABASE_URL?.length || 0);
+                console.log('- SUPABASE_ANON_KEY 존재:', !!this.config.SUPABASE_ANON_KEY);
+                console.log('- SUPABASE_ANON_KEY 값:', this.config.SUPABASE_ANON_KEY || 'undefined');
+                console.log('- SUPABASE_ANON_KEY 길이:', this.config.SUPABASE_ANON_KEY?.length || 0);
+                
                 if (!this.config.SUPABASE_URL || !this.config.SUPABASE_ANON_KEY) {
                     console.error('❌ Supabase 설정이 완전하지 않습니다!');
                     console.log('💡 해결 방법:');

@@ -9,9 +9,18 @@ class SupabaseDatabase extends DatabaseInterface {
 
     async connect() {
         try {
-            // Supabase 클라이언트 초기화
+            // 전역 싱글톤 Supabase 클라이언트 사용
             if (typeof supabase !== 'undefined') {
-                this.client = supabase.createClient(this.url, this.anonKey);
+                console.log('🔧 Supabase 데이터베이스 연결 시도 (전역 싱글톤)...');
+                
+                // 전역 싱글톤 클라이언트 초기화
+                this.client = window.initializeGlobalSupabase(this.url, this.anonKey);
+                
+                if (!this.client) {
+                    console.error('❌ 전역 Supabase 클라이언트 초기화 실패');
+                    this.connected = false;
+                    return false;
+                }
                 
                 // 연결 테스트
                 const { data, error } = await this.client.from('error_reports').select('count', { count: 'exact', head: true });
@@ -21,10 +30,10 @@ class SupabaseDatabase extends DatabaseInterface {
                 }
                 
                 this.connected = true;
-                console.log('Supabase 연결 성공');
+                console.log('✅ Supabase 데이터베이스 연결 성공 (전역 싱글톤)');
                 return true;
             } else {
-                console.error('Supabase 라이브러리가 로드되지 않았습니다.');
+                console.error('❌ Supabase 라이브러리가 로드되지 않았습니다.');
                 return false;
             }
         } catch (error) {

@@ -8,19 +8,27 @@ class LocalDatabase extends DatabaseInterface {
     async connect() {
         try {
             const response = await fetch('./data/water_stations.json');
+            
+            if (!response.ok) {
+                throw new Error(`HTTP 오류: ${response.status} ${response.statusText}`);
+            }
+            
             this.data = await response.json();
             this.connected = true;
-            console.log('로컬 데이터베이스 연결 완료:', this.data.length + '개 레코드');
+            console.log('✅ 로컬 데이터베이스 연결 완료:', this.data.length + '개 레코드');
             return true;
         } catch (error) {
-            console.error('로컬 데이터베이스 연결 실패:', error);
+            console.error('❌ 로컬 데이터베이스 연결 실패:', error);
             this.connected = false;
+            this.data = [];
             return false;
         }
     }
 
     async getAllStations() {
-        if (!this.connected) await this.connect();
+        if (!this.connected) {
+            await this.connect();
+        }
         return [...this.data];
     }
 

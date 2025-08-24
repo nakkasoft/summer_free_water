@@ -24,9 +24,23 @@ class ErrorReportManager {
                 return false;
             }
             
-            // Supabase 클라이언트 초기화
+            // 전역 싱글톤 Supabase 클라이언트 사용
             if (typeof supabase !== 'undefined') {
-                this.client = supabase.createClient(this.supabaseUrl, this.supabaseKey);
+                console.log('🔧 오류 신고 시스템: 전역 싱글톤 클라이언트 사용...');
+                
+                // 전역 싱글톤 클라이언트 가져오기
+                this.client = window.getGlobalSupabaseClient();
+                
+                // 만약 아직 초기화되지 않았다면 초기화
+                if (!this.client) {
+                    this.client = window.initializeGlobalSupabase(this.supabaseUrl, this.supabaseKey);
+                }
+                
+                if (!this.client) {
+                    console.error('❌ 전역 Supabase 클라이언트를 사용할 수 없습니다.');
+                    this.connected = false;
+                    return false;
+                }
                 
                 // 연결 테스트
                 const { error } = await this.client.from('error_reports').select('count', { count: 'exact', head: true });
@@ -39,10 +53,10 @@ class ErrorReportManager {
                 }
                 
                 this.connected = true;
-                console.log('오류 신고 시스템 (Supabase) 초기화 완료');
+                console.log('✅ 오류 신고 시스템 (Supabase) 초기화 완료');
                 return true;
             } else {
-                console.error('Supabase 라이브러리가 로드되지 않았습니다.');
+                console.error('❌ Supabase 라이브러리가 로드되지 않았습니다.');
                 this.connected = false;
                 return false;
             }

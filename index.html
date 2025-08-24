@@ -4,7 +4,10 @@
     <meta charset="utf-8">
     <title>서울시 여름철 무료 생수 제공 위치</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="서울시 각 구에서 운영하는 여름철 무료 생수 제공 위치를 지도에서 확인하세요.">
+    <meta name="description" content="서울시 각 구에                    this.updateStats();
+                    this.showLoading(false);
+
+                } catch (error) {여름철 무료 생수 제공 위치를 지도에서 확인하세요.">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="stylesheet" href="css/styles.css">
@@ -68,25 +71,98 @@
     <!-- Supabase JavaScript SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
     
+    <!-- 전역 Supabase 싱글톤 클라이언트 -->
+    <script src="js/utils/supabase-global.js"></script>
+    
     <!-- 로컬 개발용 임시 환경변수 설정 (빌드 도구 없이 직접 HTML 열 때) -->
     <script>
         // 빌드 도구(Vite 등) 없이 직접 HTML을 열 때만 사용
         // window.ENV가 없으면 임시 설정
         if (!window.ENV) {
-            window.ENV = {
-                KAKAO_API_KEY: '932066d1403575d3521925f322ec1d8b',
-                SUPABASE_URL: 'https://gmmnverhexhwboedtlai.supabase.co',
-                SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtbW52ZXJoZXhod2JvZWR0bGFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU2NTYyMDgsImV4cCI6MjA3MTIzMjIwOH0.TecIAycrP1rXJYVuDR7lz9fA0nqUWtz4QGqAPOmSdTg',
-                DATABASE_TYPE: 'supabase'
-            };
-            console.log('🔧 로컬 개발모드: 임시 환경변수 설정됨');
+            // Vercel 환경에서는 환경변수가 빌드 시 주입되므로 여기서 확인
+            const isVercel = window.location.hostname.includes('vercel.app') || 
+                           window.location.hostname.includes('vercel.com');
+            
+            if (isVercel) {
+                // Vercel 환경: 환경변수는 빌드 시 주입되므로 기본값만 설정
+                window.ENV = {
+                    KAKAO_API_KEY: '932066d1403575d3521925f322ec1d8b',
+                    DATABASE_TYPE: 'local', // Vercel에서도 로컬 데이터베이스 사용
+                    SUPABASE_URL: 'https://gmmnverhexhwboedtlai.supabase.co',
+                    SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtbW52ZXJoZXhod2JvZWR0bGFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU2NTYyMDgsImV4cCI6MjA3MTIzMjIwOH0.TecIAycrP1rXJYVuDR7lz9fA0nqUWtz4QGqAPOmSdTg'
+                };
+                console.log('🌐 Vercel 환경: 환경변수 설정됨');
+            } else {
+                // 로컬 개발 환경
+                window.ENV = {
+                    KAKAO_API_KEY: '932066d1403575d3521925f322ec1d8b',
+                    SUPABASE_URL: 'https://gmmnverhexhwboedtlai.supabase.co',
+                    SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtbW52ZXJoZXhod2JvZWR0bGFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU2NTYyMDgsImV4cCI6MjA3MTIzMjIwOH0.TecIAycrP1rXJYVuDR7lz9fA0nqUWtz4QGqAPOmSdTg',
+                    DATABASE_TYPE: 'local'  // 로컬에서도 local 데이터베이스 사용
+                };
+                console.log('🔧 로컬 개발모드: 임시 환경변수 설정됨');
+            }
         }
+        
+        // 디버그 함수들
+        window.debugApp = function() {
+            console.log('🔍 앱 상태 확인:');
+            console.log('- Supabase 라이브러리:', typeof supabase !== 'undefined' ? '✅ 로드됨' : '❌ 없음');
+            console.log('- 환경변수:', window.ENV);
+            console.log('- Kakao Maps:', typeof kakao !== 'undefined' ? '✅ 로드됨' : '❌ 없음');
+        };
+        
+        window.testWaterStations = async function() {
+            try {
+                console.log('🔍 물 제공 위치 데이터 테스트:');
+                const response = await fetch('/data/water_stations.json');
+                const data = await response.json();
+                console.log('✅ 데이터 로드 성공:', data.length + '개');
+                console.log('📍 첫 번째 위치:', data[0]);
+                return data;
+            } catch (error) {
+                console.error('❌ 데이터 로드 실패:', error);
+                return null;
+            }
+        };
+        
+        window.testAppInitialization = async function() {
+            console.log('� 앱 초기화 단계별 테스트:');
+            
+            // 1. 환경변수 확인
+            console.log('1️⃣ 환경변수:', window.ENV);
+            
+            // 2. Kakao Maps 확인
+            console.log('2️⃣ Kakao Maps:', typeof kakao !== 'undefined' ? '✅ 로드됨' : '❌ 없음');
+            
+            // 3. Supabase 확인
+            console.log('3️⃣ Supabase:', typeof supabase !== 'undefined' ? '✅ 로드됨' : '❌ 없음');
+            
+            // 4. 데이터 확인
+            const data = await testWaterStations();
+            console.log('4️⃣ 데이터:', data ? `✅ ${data.length}개` : '❌ 없음');
+            
+            // 5. 앱 인스턴스 확인
+            console.log('5️⃣ App 인스턴스:', window.app ? '✅ 생성됨' : '❌ 없음');
+            
+            return {
+                env: !!window.ENV,
+                kakao: typeof kakao !== 'undefined',
+                supabase: typeof supabase !== 'undefined', 
+                data: !!data,
+                app: !!window.app
+            };
+        };
+        
+        console.log('�💡 디버그 도움말:');
+        console.log('- debugApp(): 앱 상태 확인');
+        console.log('- testWaterStations(): 물 제공 위치 데이터 테스트');
+        console.log('- testAppInitialization(): 앱 초기화 단계별 테스트');
     </script>
     
     <!-- JavaScript 파일들 -->
     <script src="js/utils/config-loader.js"></script>
     <script src="js/utils/district-manager.js"></script>
-    <script src="js/utils/supabase-test.js"></script>
     <script src="js/database/database-interface.js"></script>
     <script src="js/database/local-database.js"></script>
     <script src="js/database/supabase-database.js"></script>
@@ -110,13 +186,13 @@
             async initialize() {
                 try {
                     this.showLoading(true, '앱 초기화 중...');
-                    console.log('앱 초기화 시작...');
+                    console.log('🚀 앱 초기화 시작...');
 
                     // 설정 로드
                     this.showLoading(true, '설정 로드 중...');
-                    console.log('설정 로드 중...');
+                    console.log('⚙️ 설정 로드 중...');
                     const config = await this.configLoader.loadConfig();
-                    console.log('설정 로드 완료:', { hasApiKey: !!config.KAKAO_API_KEY, dbType: config.DATABASE_TYPE });
+                    console.log('✅ 설정 로드 완료:', { hasApiKey: !!config.KAKAO_API_KEY, dbType: config.DATABASE_TYPE });
 
                     // API 키 검증
                     if (!config.KAKAO_API_KEY) {
@@ -125,52 +201,49 @@
 
                     // 데이터베이스 초기화
                     this.showLoading(true, '데이터베이스 연결 중...');
-                    console.log('데이터베이스 초기화 중...');
                     const dbType = this.configLoader.getDatabaseType();
                     const dbConfig = this.configLoader.getDatabaseConfig();
+                    
                     const database = DatabaseFactory.create(dbType, dbConfig);
-                    
                     this.waterStationService = new WaterStationService(database);
-                    const dbInitResult = await this.waterStationService.initialize();
                     
+                    const dbInitResult = await this.waterStationService.initialize();
                     if (!dbInitResult) {
                         throw new Error('데이터베이스 초기화에 실패했습니다.');
                     }
-                    console.log('데이터베이스 초기화 완료');
 
                     // 카카오 맵 SDK 로드
                     this.showLoading(true, '카카오맵 SDK 로드 중...');
-                    console.log('카카오맵 SDK 로드 중...');
                     await this.loadKakaoMaps(config.KAKAO_API_KEY);
-                    console.log('카카오맵 SDK 로드 완료');
 
                     // 컴포넌트 초기화
                     this.showLoading(true, '지도 및 UI 초기화 중...');
-                    console.log('컴포넌트 초기화 중...');
                     
                     // 사용자 위치 가져오기 시도
                     let userLocation = null;
                     try {
                         this.showLoading(true, '위치 정보 확인 중...');
                         userLocation = await this.getUserLocation();
-                        console.log('사용자 위치 확인 완료:', userLocation);
+                        console.log('✅ 사용자 위치 확인 완료:', userLocation);
                     } catch (error) {
-                        console.log('위치 정보 확인 실패, 기본 위치 사용:', error.message);
+                        console.log('⚠️ 위치 정보 확인 실패, 기본 위치 사용:', error.message);
                     }
                     
+                    console.log('🗺️ MapManager 생성 중...');
                     this.mapManager = new MapManager('map', this.waterStationService, userLocation);
                     this.uiController = new UIController(this.waterStationService, this.mapManager);
 
                     await this.mapManager.initialize();
                     this.uiController.initialize();
-                    console.log('컴포넌트 초기화 완료');
 
                     // 통계 정보 업데이트
                     this.showLoading(true, '통계 정보 업데이트 중...');
+                    console.log('📊 통계 정보 업데이트 중...');
                     await this.updateStats();
+                    console.log('✅ 통계 정보 업데이트 완료');
 
                     this.showLoading(false);
-                    console.log('앱 초기화 완료');
+                    console.log('🎉 앱 초기화 완료!');
 
                 } catch (error) {
                     console.error('앱 초기화 실패:', error);
@@ -253,61 +326,26 @@
             }
 
             // Supabase에 오류 로그 등록
+            // 간단한 오류 로깅 (Supabase 중복 연결 방지)
             async logErrorToSupabase(error) {
                 try {
-                    // 오류 신고 매니저가 초기화되어 있는지 확인
-                    if (window.errorReportManager && typeof window.errorReportManager.submitErrorReport === 'function') {
-                        // 상세한 오류 정보 구성
-                        let detailedDescription = `앱 초기화 오류: ${error.message}`;
-                        
-                        // 오류 타입별 상세 정보 추가
-                        if (error.message.includes('API 키')) {
-                            detailedDescription += '\n해결방법: 카카오맵 API 키 확인 필요';
-                        } else if (error.message.includes('네트워크') || error.message.includes('로드')) {
-                            detailedDescription += '\n해결방법: 네트워크 연결 또는 방화벽 설정 확인';
-                        } else if (error.message.includes('데이터베이스')) {
-                            detailedDescription += '\n해결방법: 데이터베이스 연결 또는 JSON 파일 확인';
-                        }
-                        
-                        // 스택 트레이스도 포함
-                        if (error.stack) {
-                            detailedDescription += `\n스택트레이스: ${error.stack.substring(0, 500)}`;
-                        }
-                        
-                        // 브라우저 정보 추가
-                        detailedDescription += `\n브라우저: ${navigator.userAgent}`;
-                        detailedDescription += `\n시간: ${new Date().toISOString()}`;
-                        
-                        const errorData = {
-                            stationId: 0, // 시스템 오류는 0으로 설정
-                            stationTitle: 'SYSTEM_ERROR',
-                            errorType: this.getErrorType(error),
-                            description: detailedDescription,
-                            contactInfo: ''
-                        };
-                        
-                        await window.errorReportManager.submitErrorReport(errorData);
-                        console.log('오류가 Supabase에 등록되었습니다:', error.message);
-                    } else {
-                        // 오류 신고 매니저가 없으면 로컬에만 저장
-                        console.warn('오류 신고 매니저를 사용할 수 없습니다. 로컬에만 저장합니다.');
-                        localStorage.setItem(`app_error_${Date.now()}`, JSON.stringify({
-                            timestamp: new Date().toISOString(),
-                            error: error.message,
-                            stack: error.stack,
-                            type: this.getErrorType(error),
-                            userAgent: navigator.userAgent
-                        }));
-                    }
-                } catch (logError) {
-                    console.error('Supabase 오류 등록 실패:', logError);
-                    // 최종 백업: 로컬 스토리지에 저장
-                    localStorage.setItem(`app_error_fallback_${Date.now()}`, JSON.stringify({
+                    console.log('📝 시스템 오류 로깅:', error.message);
+                    
+                    // 간단하게 콘솔과 로컬스토리지에만 기록 (Supabase 중복 연결 방지)
+                    const errorData = {
                         timestamp: new Date().toISOString(),
-                        originalError: error.message,
-                        logError: logError.message,
-                        userAgent: navigator.userAgent
-                    }));
+                        message: error.message,
+                        stack: error.stack?.substring(0, 200),
+                        userAgent: navigator.userAgent.substring(0, 100),
+                        type: this.getErrorType(error)
+                    };
+                    
+                    // 로컬스토리지에 간단히 저장
+                    localStorage.setItem(`app_error_${Date.now()}`, JSON.stringify(errorData));
+                    
+                    console.error('시스템 오류 세부사항:', errorData);
+                } catch (logError) {
+                    console.warn('오류 로깅 실패:', logError);
                 }
             }
 
@@ -416,9 +454,60 @@
             }
         }
 
+        // 디버깅 함수들
+        window.testDataLoad = async function() {
+            console.log('🧪 수동 데이터 로드 테스트 시작...');
+            
+            try {
+                console.log('1️⃣ fetch로 직접 데이터 로드 시도...');
+                const response = await fetch('./data/water_stations.json');
+                console.log('📡 fetch 응답:', response.status, response.statusText);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP 오류: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('✅ 직접 로드 성공:', data.length, '개 레코드');
+                console.log('🔍 첫 번째 레코드:', data[0]);
+                
+                return data;
+            } catch (error) {
+                console.error('❌ 직접 로드 실패:', error);
+                return null;
+            }
+        };
+        
+        window.testDatabase = async function() {
+            console.log('🧪 데이터베이스 테스트 시작...');
+            
+            if (!window.app || !window.app.waterStationService) {
+                console.error('❌ 앱이 초기화되지 않았습니다.');
+                return;
+            }
+            
+            try {
+                console.log('2️⃣ WaterStationService를 통한 데이터 로드...');
+                const stations = await window.app.waterStationService.getAllStations();
+                console.log('✅ 서비스 로드 성공:', stations.length, '개 레코드');
+                
+                if (stations.length > 0) {
+                    console.log('🔍 첫 번째 스테이션:', stations[0]);
+                } else {
+                    console.warn('⚠️ 서비스에서 빈 배열 반환됨');
+                }
+                
+                return stations;
+            } catch (error) {
+                console.error('❌ 서비스 로드 실패:', error);
+                return null;
+            }
+        };
+
         // 앱 시작
         document.addEventListener('DOMContentLoaded', () => {
             const app = new App();
+            window.app = app; // 전역 참조 추가 (디버깅용)
             app.initialize();
         });
     </script>

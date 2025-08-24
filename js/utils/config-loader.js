@@ -5,9 +5,10 @@ class ConfigLoader {
 
     async loadConfig() {
         try {
-            // 브라우저 환경에서 환경변수 로드
+            // 브라우저 환경에서 환경변수 로드 시도
+            // 다양한 방법으로 환경변수 접근 시도
             const getEnvVar = (name) => {
-                // 글로벌 ENV 객체 (HTML에서 설정된 경우)
+                // 글로벌 ENV 객체 (수동 설정된 경우)
                 if (typeof window !== 'undefined' && window.ENV) {
                     const value = window.ENV[name];
                     if (value) return value;

@@ -13,6 +13,14 @@ class SupabaseDatabase extends DatabaseInterface {
             if (typeof supabase !== 'undefined') {
                 console.log('🔧 Supabase 데이터베이스 연결 시도 (전역 싱글톤)...');
                 
+                // window.initializeGlobalSupabase 함수 존재 확인
+                if (typeof window.initializeGlobalSupabase !== 'function') {
+                    console.error('❌ window.initializeGlobalSupabase 함수가 정의되지 않았습니다.');
+                    console.error('💡 supabase-global.js가 제대로 로드되었는지 확인하세요.');
+                    this.connected = false;
+                    return false;
+                }
+                
                 // 전역 싱글톤 클라이언트 초기화
                 this.client = window.initializeGlobalSupabase(this.url, this.anonKey);
                 

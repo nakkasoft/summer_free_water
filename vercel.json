@@ -1,8 +1,25 @@
 {
   "version": 2,
+  "buildCommand": null,
   "builds": [
     {
-      "src": "**/*",
+      "src": "index.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "css/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "js/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "data/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "favicon.*",
       "use": "@vercel/static"
     }
   ]

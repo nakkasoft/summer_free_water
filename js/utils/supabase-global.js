@@ -78,3 +78,5 @@ window.initializeGlobalSupabase = function(url, anonKey) {
 };
 
 console.log('🌐 전역 Supabase 싱글톤 로드됨');
+console.log('✅ window.initializeGlobalSupabase 함수 정의 완료');
+console.log('✅ window.getGlobalSupabaseClient 함수 정의 완료');

@@ -13,14 +13,25 @@ class SupabaseDatabase extends DatabaseInterface {
             if (typeof supabase !== 'undefined') {
                 console.log('🔧 Supabase 데이터베이스 연결 시도 (전역 싱글톤)...');
                 
-                // window.initializeGlobalSupabase 함수 존재 확인
+                // window.initializeGlobalSupabase 함수가 로드될 때까지 대기
+                let retryCount = 0;
+                const maxRetries = 10;
+                
+                while (typeof window.initializeGlobalSupabase !== 'function' && retryCount < maxRetries) {
+                    console.log(`⏳ initializeGlobalSupabase 함수 로드 대기 중... (${retryCount + 1}/${maxRetries})`);
+                    await new Promise(resolve => setTimeout(resolve, 100)); // 100ms 대기
+                    retryCount++;
+                }
+                
                 if (typeof window.initializeGlobalSupabase !== 'function') {
                     console.error('❌ window.initializeGlobalSupabase 함수가 정의되지 않았습니다.');
                     console.error('💡 supabase-global.js가 제대로 로드되었는지 확인하세요.');
+                    console.error(`📊 시도 횟수: ${retryCount}/${maxRetries}`);
                     this.connected = false;
                     return false;
                 }
                 
+                console.log('✅ initializeGlobalSupabase 함수 로드 완료');
                 // 전역 싱글톤 클라이언트 초기화
                 this.client = window.initializeGlobalSupabase(this.url, this.anonKey);
                 

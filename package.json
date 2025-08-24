@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "서울시 여름철 무료 생수 제공 위치 지도",
   "scripts": {
-    "build": "node build.js",
+    "build": "echo 'Static site - no build required'",
     "start": "serve .",
     "dev": "serve ."
   },

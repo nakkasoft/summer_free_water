@@ -97,6 +97,13 @@ class WaterStationService {
 
     // 운영 상태 확인
     isOperating(station) {
+        // 운영 종료일이 있으면 오늘 날짜와 비교
+        if (station.endDate) {
+            const today = new Date();
+            const end = new Date(station.endDate);
+            // 종료일이 오늘 이전이면 운영중 아님
+            if (today > end) return false;
+        }
         return station.status === '운영중';
     }
 
